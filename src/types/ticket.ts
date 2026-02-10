@@ -45,7 +45,8 @@ export const CreateTicketSchema = z.object({
   project: z.string().default('Uncategorized'),
   assignee: z.string().optional(),
   estimate: z.number().optional(),
-  body: z.string().optional()
+  body: z.string().optional(),
+  createdBy: z.string().optional(), // User who created the ticket
 });
 
 export const UpdateTicketSchema = z.object({
@@ -56,7 +57,8 @@ export const UpdateTicketSchema = z.object({
   assignee: z.string().optional(),
   estimate: z.number().optional(),
   body: z.string().optional(),
-  grooming: GroomingSchema
+  grooming: GroomingSchema,
+  updatedBy: z.string().optional(), // User who last updated the ticket
 });
 
 // TypeScript types

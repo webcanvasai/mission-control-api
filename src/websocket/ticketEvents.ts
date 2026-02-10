@@ -4,13 +4,22 @@ import { TicketService } from '../services/ticketService';
 import { GroomingService } from '../services/groomingService';
 import { extractTicketId } from '../utils/ticketParser';
 import { ServerToClientEvents, ClientToServerEvents } from '../types/ticket';
+import { supabaseAdmin } from '../lib/supabase';
 import config from '../config';
 
 type TypedServer = Server<ClientToServerEvents, ServerToClientEvents>;
 type TypedSocket = Socket<ClientToServerEvents, ServerToClientEvents>;
 
+interface AuthenticatedSocket extends TypedSocket {
+  user?: {
+    id: string;
+    email: string;
+    role: string;
+  };
+}
+
 /**
- * Set up WebSocket event handlers
+ * Set up WebSocket event handlers with authentication
  */
 export function setupWebSocket(
   io: TypedServer,
@@ -21,10 +30,51 @@ export function setupWebSocket(
   // Track connected clients
   let clientCount = 0;
 
+  // Authentication middleware for WebSocket connections
+  io.use(async (socket: AuthenticatedSocket, next) => {
+    try {
+      const token = socket.handshake.auth?.token;
+      
+      if (!token) {
+        console.log('[WebSocket] Connection rejected: No token provided');
+        return next(new Error('Authentication required'));
+      }
+
+      // Verify token with Supabase
+      const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+
+      if (error || !user) {
+        console.log('[WebSocket] Connection rejected: Invalid token');
+        return next(new Error('Invalid authentication token'));
+      }
+
+      // Fetch user role
+      const { data: roleData } = await supabaseAdmin
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .single();
+
+      // Attach user info to socket
+      socket.user = {
+        id: user.id,
+        email: user.email || 'unknown',
+        role: roleData?.role || 'viewer'
+      };
+
+      console.log(`[WebSocket] Authenticated: ${socket.user.email} (${socket.user.role})`);
+      next();
+    } catch (error) {
+      console.error('[WebSocket] Auth error:', error);
+      next(new Error('Authentication failed'));
+    }
+  });
+
   // Handle client connections
-  io.on('connection', async (socket: TypedSocket) => {
+  io.on('connection', async (socket: AuthenticatedSocket) => {
     clientCount++;
-    console.log(`[WebSocket] Client connected: ${socket.id} (${clientCount} total)`);
+    const userInfo = socket.user ? `${socket.user.email} (${socket.user.role})` : 'unknown';
+    console.log(`[WebSocket] Client connected: ${socket.id} - ${userInfo} (${clientCount} total)`);
 
     // Send current ticket list on connect
     try {

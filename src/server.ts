@@ -8,8 +8,10 @@ import { TicketService } from './services/ticketService';
 import { WatcherService } from './services/watcherService';
 import { GroomingService } from './services/groomingService';
 import { createTicketRoutes } from './routes/tickets';
+import { createAuthRoutes } from './routes/auth';
 import { setupWebSocket } from './websocket/ticketEvents';
 import { errorHandler } from './middleware/errorHandler';
+import { requireAuth, requireRole } from './middleware/auth';
 import { ServerToClientEvents, ClientToServerEvents } from './types/ticket';
 
 // Create Express app
@@ -73,9 +75,9 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
-// Manual grooming trigger endpoint
-app.post('/api/tickets/:id/groom', async (req, res) => {
-  const { id } = req.params;
+// Manual grooming trigger endpoint (requires editor or admin)
+app.post('/api/tickets/:id/groom', requireAuth, requireRole('editor', 'admin'), async (req, res) => {
+  const id = req.params.id as string;
   
   try {
     const result = await groomingService.manualGroom(id);
@@ -102,7 +104,10 @@ app.post('/api/tickets/:id/groom', async (req, res) => {
   }
 });
 
-// API routes
+// Auth routes (user management)
+app.use('/api/auth', createAuthRoutes());
+
+// API routes (protected)
 app.use('/api/tickets', createTicketRoutes(ticketService));
 
 // 404 handler for unknown routes

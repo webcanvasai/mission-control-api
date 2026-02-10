@@ -31,7 +31,13 @@ services:
       - mission-control
 
   mission-control-frontend:
-    build: ../mission-control-frontend
+    build:
+      context: ../mission-control-frontend
+      args:
+        - VITE_API_URL=http://localhost:3001/api
+        - VITE_WS_URL=ws://localhost:3001
+        - VITE_SUPABASE_URL=https://mzoajbvcfwdkokvgkpdf.supabase.co
+        - VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16b2FqYnZjZndka29rdmdrcGRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA3MDIwNzMsImV4cCI6MjA4NjI3ODA3M30.pKAKC245vibX0bYgNSS7FQ_dbHBZij5
     container_name: mission-control-frontend
     restart: unless-stopped
     ports:
