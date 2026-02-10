@@ -254,6 +254,33 @@ describe('TicketService', () => {
       expect(tickets[0].priority).toBe('medium');
       expect(tickets[1].priority).toBe('high');
     });
+
+    it('should sort by updatedAt descending', async () => {
+      // Create tickets with specific order
+      const t1 = await ticketService.createTicket({ title: 'First' });
+      await new Promise(resolve => setTimeout(resolve, 10));
+      const t2 = await ticketService.createTicket({ title: 'Second' });
+      await new Promise(resolve => setTimeout(resolve, 10));
+      
+      // Update the first ticket to make it most recently updated
+      await ticketService.updateTicket(t1.id, { title: 'First (updated)' });
+      
+      // Clean existing tickets and add our test tickets
+      const files = await fs.readdir(testDir);
+      for (const file of files) {
+        if (!file.startsWith('TICK-00')) continue;
+        const id = file.replace('.md', '');
+        if (id !== t1.id && id !== t2.id) {
+          await ticketService.deleteTicket(id);
+        }
+      }
+      
+      const tickets = await ticketService.listTickets({ sort: 'updatedAt', order: 'desc' });
+      
+      // First ticket should be first since it was updated last
+      expect(tickets[0].id).toBe(t1.id);
+      expect(tickets[1].id).toBe(t2.id);
+    });
   });
 });
 

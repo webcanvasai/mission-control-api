@@ -81,5 +81,34 @@ export function createTicketRoutes(ticketService: TicketService): Router {
     })
   );
 
+  /**
+   * PATCH /api/tickets/:id/move
+   * Move a ticket to a different status lane (updates status and timestamp)
+   */
+  router.patch(
+    '/:id/move',
+    validateTicketId,
+    asyncHandler(async (req, res) => {
+      const { newStatus } = req.body;
+      
+      if (!newStatus) {
+        return res.status(400).json({ error: 'newStatus is required' });
+      }
+      
+      const validStatuses = ['backlog', 'groomed', 'todo', 'in-progress', 'done'];
+      if (!validStatuses.includes(newStatus)) {
+        return res.status(400).json({ 
+          error: `Invalid status. Must be one of: ${validStatuses.join(', ')}` 
+        });
+      }
+      
+      const ticket = await ticketService.updateTicket(req.params.id as string, {
+        status: newStatus,
+      });
+      
+      res.json({ success: true, ticket });
+    })
+  );
+
   return router;
 }

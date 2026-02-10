@@ -23,7 +23,7 @@ export interface GroomingStatus {
   lastError?: string;
 }
 
-export const TicketStatusSchema = z.enum(['backlog', 'groomed', 'in-progress', 'done']);
+export const TicketStatusSchema = z.enum(['backlog', 'todo', 'in-progress', 'done']);
 
 export const TicketMetadataSchema = z.object({
   id: z.string().regex(/^TICK-\d+$/, 'Invalid ticket ID format'),
