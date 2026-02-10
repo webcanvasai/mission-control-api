@@ -78,8 +78,11 @@ export function setupWebSocket(
 
     // Send current ticket list on connect
     try {
+      console.log(`[WebSocket] Fetching tickets for ${socket.id}...`);
       const tickets = await ticketService.listTickets();
+      console.log(`[WebSocket] Sending ${tickets.length} tickets to ${socket.id}`);
       socket.emit('tickets:init', tickets);
+      console.log(`[WebSocket] tickets:init emitted to ${socket.id}`);
     } catch (error) {
       console.error('[WebSocket] Error sending initial tickets:', error);
       socket.emit('error', { message: 'Failed to load tickets' });
