@@ -15,6 +15,12 @@ export interface Config {
   openclawGatewayUrl: string;
   openclawToken: string | undefined;
   autoGroomingEnabled: boolean;
+  // Supabase settings for authentication
+  supabase: {
+    url: string;
+    anonKey: string;
+    serviceKey: string;
+  };
 }
 
 function parseOrigins(origins: string | undefined): string | string[] {
@@ -61,7 +67,13 @@ const config: Config = {
   // OpenClaw gateway settings
   openclawGatewayUrl: process.env.OPENCLAW_GATEWAY_URL || 'http://localhost:18789',
   openclawToken: getOpenClawToken(),
-  autoGroomingEnabled: process.env.AUTO_GROOMING_ENABLED !== 'false' // Enabled by default
+  autoGroomingEnabled: process.env.AUTO_GROOMING_ENABLED !== 'false', // Enabled by default
+  // Supabase settings
+  supabase: {
+    url: process.env.SUPABASE_URL || '',
+    anonKey: process.env.SUPABASE_ANON_KEY || '',
+    serviceKey: process.env.SUPABASE_SERVICE_KEY || '',
+  }
 };
 
 export default config;

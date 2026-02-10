@@ -10,10 +10,16 @@
     "test": "vitest",
     "test:run": "vitest run"
   },
-  "keywords": ["mission-control", "tickets", "api", "websocket"],
+  "keywords": [
+    "mission-control",
+    "tickets",
+    "api",
+    "websocket"
+  ],
   "author": "OpenClaw",
   "license": "MIT",
   "dependencies": {
+    "@supabase/supabase-js": "^2.95.3",
     "chokidar": "^4.0.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
