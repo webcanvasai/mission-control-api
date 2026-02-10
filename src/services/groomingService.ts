@@ -176,7 +176,7 @@ export class GroomingService {
 
   /**
    * Run OpenClaw agent via HTTP API
-   * This uses the OpenClaw gateway's sessions_spawn endpoint
+   * This uses the OpenClaw gateway's /tools/invoke endpoint with sessions_spawn
    */
   private async runOpenClawAgent(ticketId: string, task: string): Promise<{ success: boolean; error?: string }> {
     try {
@@ -186,20 +186,31 @@ export class GroomingService {
         throw new Error('OpenClaw token not configured - cannot spawn grooming agent');
       }
       
-      const response = await fetch(`${config.openclawGatewayUrl}/api/sessions/spawn`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${config.openclawToken}`
-        },
-        body: JSON.stringify({
+      const url = `${config.openclawGatewayUrl}/tools/invoke`;
+      const payload = {
+        tool: 'sessions_spawn',
+        args: {
           agentId: 'grooming',
           label: `groom-${ticketId}`,
           task,
           cleanup: 'keep',
           runTimeoutSeconds: 300 // 5 minute timeout
-        })
+        }
+      };
+      
+      console.log(`[Grooming] Gateway URL: ${url}`);
+      console.log(`[Grooming] Request:`, JSON.stringify(payload).substring(0, 200) + '...');
+      
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${config.openclawToken}`
+        },
+        body: JSON.stringify(payload)
       });
+      
+      console.log(`[Grooming] Response status: ${response.status} ${response.statusText}`);
       
       if (!response.ok) {
         const errorText = await response.text();
@@ -207,13 +218,23 @@ export class GroomingService {
       }
       
       const result = await response.json();
+      
+      if (!result.ok) {
+        throw new Error(`Gateway error: ${result.error?.message || JSON.stringify(result.error)}`);
+      }
+      
       console.log(`[Grooming] Successfully spawned grooming agent for ${ticketId}`);
+      console.log(`[Grooming] Session: ${result.result?.childSessionKey || 'unknown'}`);
       
       return { success: true };
       
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
       console.error(`[Grooming] Failed to spawn agent for ${ticketId}:`, errorMsg);
+      if (errorStack) {
+        console.error(`[Grooming] Stack trace:`, errorStack);
+      }
       return { success: false, error: errorMsg };
     }
   }

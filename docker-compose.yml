@@ -13,7 +13,7 @@ services:
       - VAULT_PATH=/tickets
       - CORS_ORIGIN=http://localhost:3000,https://mc.ctx.gg
       - OPENCLAW_TOKEN=f272b0370e60c13db3190ad391fd49ebf663cb91ef961316
-      - OPENCLAW_GATEWAY_URL=http://host.docker.internal:18789
+      - OPENCLAW_GATEWAY_URL=http://192.168.1.184:18789
     volumes:
       - /home/chris/Kolenko/Mission Control/tickets:/tickets:rw
     extra_hosts:
