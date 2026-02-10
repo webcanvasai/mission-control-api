@@ -1,7 +1,6 @@
 import { Ticket, GroomingStatus } from '../types/ticket';
 import { TicketService } from './ticketService';
 import config from '../config';
-import { spawn } from 'child_process';
 
 /**
  * Grooming Service
@@ -176,64 +175,47 @@ export class GroomingService {
   }
 
   /**
-   * Run OpenClaw agent via CLI
-   * This spawns the grooming agent as a background process
+   * Run OpenClaw agent via HTTP API
+   * This uses the OpenClaw gateway's sessions_spawn endpoint
    */
-  private runOpenClawAgent(ticketId: string, task: string): Promise<{ success: boolean; error?: string }> {
-    return new Promise((resolve) => {
-      console.log(`[Grooming] Spawning OpenClaw agent for ${ticketId}`);
+  private async runOpenClawAgent(ticketId: string, task: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      console.log(`[Grooming] Spawning OpenClaw agent for ${ticketId} via HTTP`);
       
-      // Build the CLI command
-      const args = [
-        'agent',
-        '--agent', 'grooming',
-        '--session-id', `groom:${ticketId}`,
-        '--message', task
-      ];
+      if (!config.openclawToken) {
+        throw new Error('OpenClaw token not configured - cannot spawn grooming agent');
+      }
       
-      const child = spawn('openclaw', args, {
-        detached: true,
-        stdio: ['ignore', 'pipe', 'pipe'],
-        env: { ...process.env }
+      const response = await fetch(`${config.openclawGatewayUrl}/api/sessions/spawn`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${config.openclawToken}`
+        },
+        body: JSON.stringify({
+          agentId: 'grooming',
+          label: `groom-${ticketId}`,
+          task,
+          cleanup: 'keep',
+          runTimeoutSeconds: 300 // 5 minute timeout
+        })
       });
       
-      let stdout = '';
-      let stderr = '';
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Gateway returned ${response.status}: ${errorText}`);
+      }
       
-      // Capture output for debugging
-      child.stdout?.on('data', (data) => {
-        stdout += data.toString();
-      });
+      const result = await response.json();
+      console.log(`[Grooming] Successfully spawned grooming agent for ${ticketId}`);
       
-      child.stderr?.on('data', (data) => {
-        stderr += data.toString();
-      });
+      return { success: true };
       
-      // Set a timeout - we don't want to wait forever
-      const timeout = setTimeout(() => {
-        console.log(`[Grooming] Agent for ${ticketId} started successfully (timeout - continuing in background)`);
-        child.unref(); // Let the process continue in the background
-        resolve({ success: true });
-      }, 10000); // 10 second timeout to confirm it started
-      
-      child.on('error', (err) => {
-        clearTimeout(timeout);
-        console.error(`[Grooming] Failed to spawn agent for ${ticketId}:`, err);
-        resolve({ success: false, error: err.message });
-      });
-      
-      child.on('exit', (code) => {
-        clearTimeout(timeout);
-        if (code === 0) {
-          console.log(`[Grooming] Agent for ${ticketId} completed successfully`);
-          resolve({ success: true });
-        } else {
-          const errorMsg = stderr || stdout || `Exit code ${code}`;
-          console.error(`[Grooming] Agent for ${ticketId} failed:`, errorMsg);
-          resolve({ success: false, error: errorMsg });
-        }
-      });
-    });
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      console.error(`[Grooming] Failed to spawn agent for ${ticketId}:`, errorMsg);
+      return { success: false, error: errorMsg };
+    }
   }
 
   /**
