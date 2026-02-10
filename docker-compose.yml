@@ -15,8 +15,8 @@ services:
       - OPENCLAW_TOKEN=f272b0370e60c13db3190ad391fd49ebf663cb91ef961316
       - OPENCLAW_GATEWAY_URL=http://192.168.1.184:18789
       - SUPABASE_URL=https://mzoajbvcfwdkokvgkpdf.supabase.co
-      - SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16b2FqYnZjZndka29rdmdrcGRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA3MDIwNzMsImV4cCI6MjA4NjI3ODA3M30.pKAKC245vibX0bYgNSS7FQ_dbHBZij5
-      - SUPABASE_SERVICE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16b2FqYnZjZndka29rdmdrcGRmIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDcwMjA3MywiZXhwIjoyMDg2Mjc4MDczfQ.PUVmzxqvhj8wD2K3mwhJEQ_-MEQSjM-
+      - SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16b2FqYnZjZndka29rdmdrcGRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2ODcxOTAsImV4cCI6MjA4NjI2MzE5MH0.dpXF2e_BxZAhJLIZ-HMTthug3d-XLSJcJAjSsNlKbnc
+      - SUPABASE_SERVICE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16b2FqYnZjZndka29rdmdrcGRmIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDY4NzE5MCwiZXhwIjoyMDg2MjYzMTkwfQ.M7Aa_XgLSlFN-6uxzIqfJZBjZ85r714b6wHAAeiEKO8
     volumes:
       - /home/chris/Kolenko/Mission Control/tickets:/tickets:rw
     extra_hosts:
