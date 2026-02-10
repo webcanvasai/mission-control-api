@@ -1,0 +1,35 @@
+{
+  "name": "mission-control-api",
+  "version": "1.0.0",
+  "description": "Mission Control API Server - File watcher and WebSocket server for ticket management",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "tsx watch src/server.ts",
+    "test": "vitest",
+    "test:run": "vitest run"
+  },
+  "keywords": ["mission-control", "tickets", "api", "websocket"],
+  "author": "OpenClaw",
+  "license": "MIT",
+  "dependencies": {
+    "chokidar": "^4.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "gray-matter": "^4.0.3",
+    "socket.io": "^4.8.1",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.13.1",
+    "@types/supertest": "^6.0.2",
+    "supertest": "^7.0.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.5"
+  }
+}

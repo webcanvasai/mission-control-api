@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  mission-control-api:
+    build: .
+    container_name: mission-control-api
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - VAULT_PATH=/tickets
+      - CORS_ORIGIN=http://localhost:3000,https://mc.ctx.gg
+      - OPENCLAW_TOKEN=f272b0370e60c13db3190ad391fd49ebf663cb91ef961316
+      - OPENCLAW_GATEWAY_URL=http://host.docker.internal:18789
+    volumes:
+      - /home/chris/Kolenko/Mission Control/tickets:/tickets:rw
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3001/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - mission-control
+
+  mission-control-frontend:
+    build: ../mission-control-frontend
+    container_name: mission-control-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mission-control-api
+    networks:
+      - mission-control
+
+networks:
+  mission-control:
+    driver: bridge

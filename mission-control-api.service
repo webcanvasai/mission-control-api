@@ -1,0 +1,32 @@
+[Unit]
+Description=Mission Control API Server
+Documentation=https://github.com/your-org/mission-control-api
+After=network.target
+
+[Service]
+Type=simple
+User=chris
+Group=chris
+WorkingDirectory=/home/chris/mission-control-api
+ExecStart=/usr/bin/node /home/chris/mission-control-api/dist/server.js
+Restart=on-failure
+RestartSec=10
+
+# Environment
+Environment=NODE_ENV=production
+EnvironmentFile=/home/chris/mission-control-api/.env
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=mission-control-api
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/chris/Kolenko/Mission Control/tickets
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
