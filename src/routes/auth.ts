@@ -18,11 +18,15 @@ export function createAuthRoutes(): Router {
     '/me',
     requireAuth,
     asyncHandler(async (req, res) => {
+      // Get full user details from auth to include metadata
+      const { data: { user }, error } = await supabaseAdmin.auth.admin.getUserById(req.user!.id);
+      
       res.json({
         user: {
           id: req.user!.id,
           email: req.user!.email,
           role: req.user!.role,
+          displayName: user?.user_metadata?.display_name || req.user!.email,
         }
       });
     })
