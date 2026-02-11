@@ -9,6 +9,7 @@ import { WatcherService } from './services/watcherService';
 import { GroomingService } from './services/groomingService';
 import { createTicketRoutes } from './routes/tickets';
 import { createAuthRoutes } from './routes/auth';
+import { createProjectRoutes } from './routes/projects';
 import { setupWebSocket } from './websocket/ticketEvents';
 import { errorHandler } from './middleware/errorHandler';
 import { requireAuth, requireRole } from './middleware/auth';
@@ -106,6 +107,9 @@ app.post('/api/tickets/:id/groom', requireAuth, requireRole('editor', 'admin'), 
 
 // Auth routes (user management)
 app.use('/api/auth', createAuthRoutes());
+
+// Project routes (project membership management)
+app.use('/api/projects', createProjectRoutes(ticketService));
 
 // API routes (protected)
 app.use('/api/tickets', createTicketRoutes(ticketService));
